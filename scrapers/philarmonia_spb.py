@@ -39,16 +39,17 @@ def fetch_spb_philarmonia_gigs(
 
         gig = Gig(
             __scrape_name(event_soup),
-            "",
+            "", # description
             __scrape_image_url(image_boxes, i),
             __scrape_performances(event_soup),
             __scrape_datetime(event_soup, year, month),
-            "",
-            3  # Spb philarmony id
+            "", # duration
+            3,  # Spb philarmony id
+            full_event_link
         )
 
         print(gig.name)
-        print(gig.image_url)
+        print(gig.imageUrl)
         print(gig.performances)
         print(gig.timestamp)
         gigs.append(gig)

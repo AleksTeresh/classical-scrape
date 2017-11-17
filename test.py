@@ -2,7 +2,7 @@
 
 from common.gig import Gig
 from common.performance import Performance
-from common.client import post_new_gig
+from common.client import post_new_gig, post_new_token_req
 
 gig = Gig(
     'RSO & Lintu & Finley',
@@ -15,7 +15,9 @@ gig = Gig(
     ],
     '2017-12-13T19:00:00+02:00',
     '2 hours',
-    1  # Musiikkitalo id
+    1,  # Musiikkitalo id
+    'https://www.musiikkitalo.fi'
 )
 
-post_new_gig(gig)
+response = post_new_token_req('admin@classical.dynu.net', 'adminsecret')
+post_new_gig(gig, response.json()['token'])

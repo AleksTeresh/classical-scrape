@@ -21,7 +21,7 @@ class Gig (dict):
         self.__dict__ = self
         self.name = name
         self.description = description
-        self.image_url = image_url
+        self.imageUrl = image_url
         self.performances = performances
         self.timestamp = timestamp
         self.duration = duration
