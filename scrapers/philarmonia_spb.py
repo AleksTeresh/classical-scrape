@@ -124,4 +124,4 @@ def __scrape_datetime (event_soup: object, yeah: int, month: int) -> str:
         hoursInt += 12
         hours = str(hoursInt)
 
-    return str(yeah) + '-' + str(month) + '-' + day + ' ' + hours + ':' + minutes + ':00'
+    return str(yeah) + '-' + str(month) + '-' + day + 'T' + hours + ':' + minutes + ':00+02:00'
