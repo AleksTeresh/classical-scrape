@@ -1,2 +1,4 @@
 .idea
 __pycache__
+cert.key
+cert.pem

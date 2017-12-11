@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 # import libraries
+import time
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from typing import List, Tuple
@@ -48,11 +49,13 @@ def fetch_spb_philarmonia_gigs(
             full_event_link
         )
 
-        print(gig.name)
-        print(gig.imageUrl)
-        print(gig.performances)
-        print(gig.timestamp)
+        #print(gig.name)
+        #print(gig.imageUrl)
+        #print(gig.performances)
+        #print(gig.timestamp)
+        print('Gig was fetched')
         gigs.append(gig)
+        time.sleep(1)
 
     return gigs
 
@@ -120,7 +123,7 @@ def __scrape_datetime (event_soup: object, yeah: int, month: int) -> str:
     hoursInt = int(hours)
     minutes = time[3:-3]
     z = time[-2:] # AM or PM
-    if z == 'PM':
+    if z == 'PM' or z == 'pm':
         hoursInt += 12
         hours = str(hoursInt)
 

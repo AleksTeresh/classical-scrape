@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 # import libraries
+import time
 from urllib.request import urlopen
 from bs4 import BeautifulSoup, NavigableString, Tag
 from typing import List, Tuple
@@ -31,6 +32,7 @@ def fetch_mariinsky_gigs (
     # image_boxes = soup.find_all('div', attrs={'class': 'mer_item_img'})
 
     for i in range(len(event_boxes)):
+
         event_box = event_boxes[i]
 
         full_event_link = 'https://www.mariinsky.ru' + event_box.contents[0]['href']
@@ -48,12 +50,14 @@ def fetch_mariinsky_gigs (
             full_event_link
         )
 
-        print(gig.name)
-        print(gig.description)
-        print(gig.imageUrl)
-        print(gig.performances)
-        print(gig.timestamp)
+        # print(gig.name)
+        # print(gig.description)
+        #print(gig.imageUrl)
+        #print(gig.performances)
+        #print(gig.timestamp)
+        print('Gig was fetched')
         gigs.append(gig)
+        time.sleep(1)
 
     return gigs
 
@@ -65,7 +69,7 @@ def __scrape_name (event_soup: object) -> str:
 
 def __scrape_description (event_soup: object) -> str:
     description_field = event_soup.find('div', attrs={'class': 'description'})
-    description = description_field.text.strip()
+    description = innerHTML(description_field)# str().strip()
 
     return description
 
@@ -163,4 +167,8 @@ def __scrape_datetime (event_soup: object, yeah: int, month: int) -> str:
 
     return str(yeah) + '-' + str(month) + '-' + day + 'T' + time + ':00+02:00'
 
-# fetch_mariinsky_gigs()
+def innerHTML(element):
+    if element is None:
+        return ''
+
+    return element.decode_contents(formatter="html")

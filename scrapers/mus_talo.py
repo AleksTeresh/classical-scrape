@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 # import libraries
+import time
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from typing import List, Tuple
@@ -44,7 +45,10 @@ def fetch_musiikkitalo_gigs(page_number: int = 1) -> List[Gig]:
         )
 
         print('Gig was fetched')
+        print(gig.duration)
+        print('sdsd')
         gigs.append(gig)
+        time.sleep(1)
 
     return gigs
 
@@ -69,6 +73,8 @@ def __scrape_image_url (event_soup: object) -> str:
 def __scrape_duration (event_soup: object) -> str:
     duration_field = event_soup.find('span', attrs={'class': 'event-duration__duration'})
     duration = duration_field.text.strip()
+
+    return duration
 
 def __scrape_performances (event_soup: object) -> List[Performance]:
     performances = []
