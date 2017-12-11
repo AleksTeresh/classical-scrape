@@ -137,7 +137,7 @@ def __scrape_performances (event_soup: object) -> List[Performance]:
                 strings = list(filter(lambda x: 'PROGRAMME' not in x, strings))
 
                 composer = ''
-                if len(strings) == 1:
+                if len(strings) == 1 and strings[0] == 'Performed by':
                     performances.append(Performance(strings[0], ''))
                 elif len(strings) > 0:
                     composer = strings[0]
