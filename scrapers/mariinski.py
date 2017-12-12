@@ -18,92 +18,99 @@ def fetch_mariinsky_gigs (
         month: int = datetime.datetime.now().month
 ) -> List[Gig]:
     quote_page = QUOTE_PAGE + 'year=' + str(year) + '&month=' + str(month)
-    # query the website and return the html to the variable ‘page’
-    page = urlopen(quote_page)
-
-    # parse the html using beautiful soap and store in variable `soup`
-    soup = BeautifulSoup(page, 'html.parser')
 
     gigs = []
-    # all the event links
-    event_boxes = soup.find_all('div', attrs={'class': 'spec_name'})
+    try:
+        # query the website and return the html to the variable ‘page’
+        page = urlopen(quote_page)
 
-    # all the images
-    # image_boxes = soup.find_all('div', attrs={'class': 'mer_item_img'})
+        # parse the html using beautiful soap and store in variable `soup`
+        soup = BeautifulSoup(page, 'html.parser')
+
+        # all the event links
+        event_boxes = soup.find_all('div', attrs={'class': 'spec_name'})
+    except:
+        return gigs
 
     for i in range(len(event_boxes)):
 
-        event_box = event_boxes[i]
+        try:
+            event_box = event_boxes[i]
 
-        full_event_link = 'https://www.mariinsky.ru' + event_box.contents[0]['href']
-        event_page = urlopen(full_event_link)
-        event_soup = BeautifulSoup(event_page, 'html.parser')
+            full_event_link = 'https://www.mariinsky.ru' + event_box.contents[0]['href']
+            event_page = urlopen(full_event_link)
+            event_soup = BeautifulSoup(event_page, 'html.parser')
+        except:
+            continue
 
-        gig = Gig(
-            __scrape_name(event_soup),
-            __scrape_description(event_soup),
-            __scrape_image_url(event_soup),
-            __scrape_performances(event_soup),
-            __scrape_datetime(event_soup, year, month),
-            "", # duration
-            2,  # Mariinsky id
-            full_event_link
-        )
+        gig_name = __scrape_name(event_soup)
 
-        # print(gig.name)
-        # print(gig.description)
-        #print(gig.imageUrl)
-        #print(gig.performances)
-        #print(gig.timestamp)
-        print('Gig was fetched')
-        gigs.append(gig)
+        if gig_name != '':
+            gig = Gig(
+                gig_name,
+                __scrape_description(event_soup),
+                __scrape_image_url(event_soup),
+                __scrape_performances(event_soup),
+                __scrape_datetime(event_soup, year, month),
+                "", # duration
+                2,  # Mariinsky id
+                full_event_link
+            )
+
+            print('Gig was fetched')
+            gigs.append(gig)
+
         time.sleep(1)
 
     return gigs
 
 def __scrape_name (event_soup: object) -> str:
-    title_field = event_soup.find('span', attrs={'itemprop': 'summary'})
-    title = title_field.text.strip()
+    try:
+        title_field = event_soup.find('span', attrs={'itemprop': 'summary'})
+        title = title_field.text.strip()
 
-    return title
+        return title
+    except:
+        return ''
 
 def __scrape_description (event_soup: object) -> str:
-    description_field = event_soup.find('div', attrs={'class': 'description'})
-    description = innerHTML(description_field)# str().strip()
+    try:
+        description_field = event_soup.find('div', attrs={'class': 'description'})
+        description = __innerHTML(description_field)# str().strip()
 
-    return description
+        return description
+    except:
+        return ''
 
 def __scrape_image_url (event_soup: object) -> str:
-    image_box = event_soup.find('div', attrs={'id': 'spec_img_cont'})
-    image_url = image_box.contents[0]['src']
+    try:
+        image_box = event_soup.find('div', attrs={'id': 'spec_img_cont'})
+        image_url = image_box.contents[0]['src']
 
-    return 'https://www.mariinsky.ru' + image_url
-
-def __extract_image_url(image_field):
-    attrs = image_field.attrs
-    if len(attrs) > 2:
-        return attrs['style'].strip()[23:-2]
-
-    return ''
-
+        return 'https://www.mariinsky.ru' + image_url
+    except:
+        return ''
 
 def __scrape_performances (event_soup: object) -> List[Performance]:
     performances = []
     # get the outer description box
     repertoire_field = event_soup.find('div', attrs={'class': 'description'})
     # if the description box exists
-    if repertoire_field:
-        # get all the <p> tags inside
-        p_tags = repertoire_field.findAll('p')
-        index = 0
-        # skip all the <p> tags until we get to the "PROGRAMME:" part
-        while index < len(p_tags) and\
-                not ('PROGRAMME' in str(p_tags[index].contents[0]) or\
-                             (len(p_tags[index].contents) > 1 and\
-                                         'PROGRAMME' in str(p_tags[index].contents[1]))):
-            index = index + 1
+    if repertoire_field is not None:
+        try:
+            # get all the <p> tags inside
+            p_tags = repertoire_field.findAll('p')
+            index = 0
+            # skip all the <p> tags until we get to the "PROGRAMME:" part
+            while index < len(p_tags) and\
+                    not ('PROGRAMME' in str(p_tags[index].contents[0]) or\
+                                 (len(p_tags[index].contents) > 1 and\
+                                             'PROGRAMME' in str(p_tags[index].contents[1]))):
+                index = index + 1
+        except:
+            return performances
 
-        # if we found "PROGRAMME:" part, go through it, entry by entry untill we encounter the next subheading i.e UPPERCASED text
+        # if we found "PROGRAMME:" part, go through it, entry by entry until we encounter the next subheading i.e UPPERCASED text
         try:
             while index < len(p_tags) and ('PROGRAMME' in str(p_tags[index].contents[1]) or not str(p_tags[index].contents[1]).isupper()):
                 # list to store all the string values
@@ -159,16 +166,22 @@ def __scrape_performances (event_soup: object) -> List[Performance]:
     return performances
 
 def __scrape_datetime (event_soup: object, yeah: int, month: int) -> str:
-    day = event_soup.find('div', attrs={'class': 'day'}).text.strip()
-    time = event_soup.find('div', attrs={'class': 'hour'}).text.strip()
+    try:
+        day = event_soup.find('div', attrs={'class': 'day'}).text.strip()
+        time = event_soup.find('div', attrs={'class': 'hour'}).text.strip()
 
-    if len(day) == 1:
-        day = '0' + day
+        if len(day) == 1:
+            day = '0' + day
 
-    return str(yeah) + '-' + str(month) + '-' + day + 'T' + time + ':00+02:00'
-
-def innerHTML(element):
-    if element is None:
+        return str(yeah) + '-' + str(month) + '-' + day + 'T' + time + ':00+02:00'
+    except:
         return ''
 
-    return element.decode_contents(formatter="html")
+def __innerHTML(element: object) -> str:
+    try:
+        if element is None:
+            return ''
+
+        return element.decode_contents(formatter="html")
+    except:
+        return ''

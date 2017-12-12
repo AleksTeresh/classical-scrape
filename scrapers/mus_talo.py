@@ -28,67 +28,106 @@ def fetch_musiikkitalo_gigs(page_number: int = 1) -> List[Gig]:
 
     for i in range(len(event_links)):
         event_link = event_links[i]
+        # if there is no url leading to the ull info event page, move to the next event
+        try:
+            event_url = event_link['href']
+        except:
+            continue
 
-        full_event_link = 'https://www.musiikkitalo.fi' + event_link['href']
-        event_page = urlopen(full_event_link)
-        event_soup = BeautifulSoup(event_page, 'html.parser')
+        if event_url == '' or event_url == '#':
+            continue
 
-        gig = Gig(
-            __scrape_name(event_soup),
-            __scrape_description(event_soup),
-            __scrape_image_url(event_soup),
-            __scrape_performances(event_soup),
-            __scrape_datetime(datetime_boxes, i),
-            __scrape_duration(event_soup),
-            1,  # Musiikkitalo id,
-            full_event_link
-        )
+        event_soup = ''
+        try:
+            full_event_link = 'https://www.musiikkitalo.fi' + event_link['href']
+            event_page = urlopen(full_event_link)
+            event_soup = BeautifulSoup(event_page, 'html.parser')
+        except:
+            continue
 
-        print('Gig was fetched')
-        print(gig.duration)
-        print('sdsd')
-        gigs.append(gig)
+        gig_name = __scrape_name(event_soup)
+
+        if gig_name != '':
+            gig = Gig(
+                gig_name,
+                __scrape_description(event_soup),
+                __scrape_image_url(event_soup),
+                __scrape_performances(event_soup),
+                __scrape_datetime(datetime_boxes, i),
+                __scrape_duration(event_soup),
+                1,  # Musiikkitalo id,
+                full_event_link
+            )
+
+            print('Gig was fetched')
+            print(gig.duration)
+            print('sdsd')
+            gigs.append(gig)
+
         time.sleep(1)
 
     return gigs
 
 def __scrape_name (event_soup: object) -> str:
-    title_field = event_soup.find('div', attrs={'class': 'field field--title-field'})
-    title = title_field.contents[1].text.strip()
+    try:
+        title_field = event_soup.find('div', attrs={'class': 'field field--title-field'})
+        title = title_field.contents[1].text.strip()
 
-    return title
+        return title
+    except:
+        return ''
 
 def __scrape_description (event_soup: object) -> str:
-    description_field = event_soup.find('div', attrs={'class': 'field field--field-description'})
-    description = description_field.text.strip()
+    try:
+        description_field = event_soup.find('div', attrs={'class': 'field field--field-description'})
+        description = description_field.text.strip()
 
-    return description
+        return description
+    except:
+        return ''
+
 
 def __scrape_image_url (event_soup: object) -> str:
-    image_field = event_soup.find('ul', attrs={'class': 'slides'})
-    image_url = image_field.contents[0].contents[1].contents[1].contents[0]['src']
+    try:
+        image_field = event_soup.find('ul', attrs={'class': 'slides'})
+        image_url = image_field.contents[0].contents[1].contents[1].contents[0]['src']
 
-    return image_url
+        return image_url
+    except:
+        return ''
 
 def __scrape_duration (event_soup: object) -> str:
-    duration_field = event_soup.find('span', attrs={'class': 'event-duration__duration'})
-    duration = duration_field.text.strip()
+    try:
+        duration_field = event_soup.find('span', attrs={'class': 'event-duration__duration'})
+        duration = duration_field.text.strip()
 
-    return duration
+        return duration
+    except:
+        return ''
 
 def __scrape_performances (event_soup: object) -> List[Performance]:
     performances = []
     repertoire_field = event_soup.find('div', attrs={'class': 'field field--event-repertoires'})
-    if repertoire_field:
-        for child in repertoire_field.children:
-            if hasattr(child, 'contents'):
-                composer = child.contents[1].text.strip()
-                opus = child.contents[3].text.strip()
-                performances.append(Performance(opus, composer))
+    if repertoire_field is not None:
+        try:
+            for child in repertoire_field.children:
+                try:
+                    if hasattr(child, 'contents'):
+                        composer = child.contents[1].text.strip()
+                        opus = child.contents[3].text.strip()
+                        performances.append(Performance(opus, composer))
+                except:
+                    continue
+
+        except:
+            return performances
 
     return performances
 
 def __scrape_datetime (datetime_boxes: List[object], currentIndex: int) -> str:
-    datetimes = list(map(lambda x: x['content'].strip(), datetime_boxes))
+    try:
+        datetimes = list(map(lambda x: x['content'].strip(), datetime_boxes))
 
-    return datetimes[currentIndex]
+        return datetimes[currentIndex]
+    except:
+        return ''

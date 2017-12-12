@@ -30,7 +30,13 @@ def __get_new_token():
 fetch_date = datetime.date.today()
 # fetch 4 months ahead including the current
 for x in range(0, 4):
-    fetched_mariinsky_gigs = fetch_mariinsky_gigs(fetch_date.year, fetch_date.month)
+    fetched_mariinsky_gigs = []
+
+    try:
+        fetched_mariinsky_gigs = fetch_mariinsky_gigs(fetch_date.year, fetch_date.month)
+    except:
+        fetched_mariinsky_gigs = []
+
     # make sure the token is not expired, since fetching might take a while
     token = __get_new_token()
     for gig in fetched_mariinsky_gigs:
@@ -41,7 +47,13 @@ for x in range(0, 4):
 
 
 # has full composer names, but spelling is often specific
-fetched_musiikkitalo_gigs = fetch_musiikkitalo_gigs(10)
+fetched_musiikkitalo_gigs = []
+
+try:
+    fetched_musiikkitalo_gigs = fetch_musiikkitalo_gigs(10)
+except:
+    fetched_mariinsky_gigs = []
+
 token = __get_new_token()
 for gig in fetched_musiikkitalo_gigs:
   post_new_gig(gig, token)
@@ -52,7 +64,12 @@ for gig in fetched_musiikkitalo_gigs:
 fetch_date = datetime.date.today()
 # fetch 4 months ahead including the current
 for x in range(0, 4):
-    fetched_spb_philarmoni_gigs = fetch_spb_philarmonia_gigs(fetch_date.year, fetch_date.month)
+    fetched_spb_philarmoni_gigs = []
+    try:
+        fetched_spb_philarmoni_gigs = fetch_spb_philarmonia_gigs(fetch_date.year, fetch_date.month)
+    except:
+        fetched_spb_philarmoni_gigs = []
+
     # make sure the token is not expired, since fetching might take a while
     token = __get_new_token()
     for gig in fetched_spb_philarmoni_gigs:
