@@ -8,6 +8,7 @@ from typing import List, Tuple
 
 from common.gig import Gig
 from common.performance import Performance
+from common.performance_util import filter_valid_performances
 
 # specify the url
 QUOTE_PAGE = 'https://www.musiikkitalo.fi/en/events/calendar?pg='
@@ -46,13 +47,19 @@ def fetch_musiikkitalo_gigs(page_number: int = 1) -> List[Gig]:
             continue
 
         gig_name = __scrape_name(event_soup)
+        performances = __scrape_performances(event_soup)
+        valid_performances = []
+        try:
+            valid_performances = filter_valid_performances(performances)
+        except:
+            valid_performances = performances
 
         if gig_name != '':
             gig = Gig(
                 gig_name,
                 __scrape_description(event_soup),
                 __scrape_image_url(event_soup),
-                __scrape_performances(event_soup),
+                valid_performances,
                 __scrape_datetime(datetime_boxes, i),
                 __scrape_duration(event_soup),
                 1,  # Musiikkitalo id,
@@ -60,11 +67,9 @@ def fetch_musiikkitalo_gigs(page_number: int = 1) -> List[Gig]:
             )
 
             print('Gig was fetched')
-            print(gig.duration)
-            print('sdsd')
             gigs.append(gig)
 
-        time.sleep(1)
+        time.sleep(1.5)
 
     return gigs
 

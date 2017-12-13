@@ -9,6 +9,7 @@ import datetime
 
 from common.gig import Gig
 from common.performance import Performance
+from common.performance_util import filter_valid_performances
 
 # specify the url
 QUOTE_PAGE = 'http://www.philharmonia.spb.ru/en/afisha/?'
@@ -42,13 +43,19 @@ def fetch_spb_philarmonia_gigs(
             continue
 
         gig_name = __scrape_name(event_soup)
+        performances = __scrape_performances(event_soup)
+        valid_performances = []
+        try:
+            valid_performances = filter_valid_performances(performances)
+        except:
+            valid_performances = performances
 
         if gig_name != '':
             gig = Gig(
                 gig_name,
                 "", # description
                 __scrape_image_url(image_boxes, i),
-                __scrape_performances(event_soup),
+                valid_performances,
                 __scrape_datetime(event_soup, year, month),
                 "", # duration
                 3,  # Spb philarmony id
@@ -58,7 +65,7 @@ def fetch_spb_philarmonia_gigs(
             print('Gig was fetched')
             gigs.append(gig)
 
-        time.sleep(1)
+        time.sleep(1.5)
 
     return gigs
 

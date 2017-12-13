@@ -52,15 +52,15 @@ fetched_musiikkitalo_gigs = []
 try:
     fetched_musiikkitalo_gigs = fetch_musiikkitalo_gigs(10)
 except:
-    fetched_mariinsky_gigs = []
+    fetched_musiikkitalo_gigs = []
 
 token = __get_new_token()
 for gig in fetched_musiikkitalo_gigs:
-  post_new_gig(gig, token)
+    post_new_gig(gig, token)
 
 
 # has only last names of composers, hence should go last,
-# so that it will eventually match with one of the previouslt created composers
+# so that it will eventually match with one of the previously created composers
 fetch_date = datetime.date.today()
 # fetch 4 months ahead including the current
 for x in range(0, 4):
@@ -73,7 +73,7 @@ for x in range(0, 4):
     # make sure the token is not expired, since fetching might take a while
     token = __get_new_token()
     for gig in fetched_spb_philarmoni_gigs:
-      post_new_gig(gig, token)
+        post_new_gig(gig, token)
 
     # increment month value to fetch further gigs
     fetch_date = __get_next_month(fetch_date)

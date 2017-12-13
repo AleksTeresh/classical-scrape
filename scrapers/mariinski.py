@@ -9,6 +9,7 @@ import datetime
 
 from common.gig import Gig
 from common.performance import Performance
+from common.performance_util import filter_valid_performances
 
 # specify the url
 QUOTE_PAGE = 'https://www.mariinsky.ru/en/playbill/playbill?type=concert&'
@@ -44,13 +45,19 @@ def fetch_mariinsky_gigs (
             continue
 
         gig_name = __scrape_name(event_soup)
+        performances = __scrape_performances(event_soup)
+        valid_performances = []
+        try:
+            valid_performances = filter_valid_performances(performances)
+        except:
+            valid_performances = performances
 
         if gig_name != '':
             gig = Gig(
                 gig_name,
                 __scrape_description(event_soup),
                 __scrape_image_url(event_soup),
-                __scrape_performances(event_soup),
+                valid_performances,
                 __scrape_datetime(event_soup, year, month),
                 "", # duration
                 2,  # Mariinsky id
@@ -60,7 +67,7 @@ def fetch_mariinsky_gigs (
             print('Gig was fetched')
             gigs.append(gig)
 
-        time.sleep(1)
+        time.sleep(1.5)
 
     return gigs
 
@@ -144,7 +151,7 @@ def __scrape_performances (event_soup: object) -> List[Performance]:
                 strings = list(filter(lambda x: 'PROGRAMME' not in x, strings))
 
                 composer = ''
-                if len(strings) == 1 and strings[0] == 'Performed by':
+                if len(strings) == 1 and strings[0] != 'Performed by':
                     performances.append(Performance(strings[0], ''))
                 elif len(strings) > 0:
                     composer = strings[0]
