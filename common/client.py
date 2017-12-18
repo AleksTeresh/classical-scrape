@@ -5,8 +5,8 @@ import requests
 from common.encoders.gig_encoder import GigEncoder
 from common.gig import Gig
 
-GIG_URL = 'https://localhost:8085/api/gig'
-AUTH_URL = 'https://localhost:8085/api/auth'
+GIG_URL = 'https://classical.dynu.net/api/gig'
+AUTH_URL = 'https://classical.dynu.net/api/auth'
 
 myEncoder = GigEncoder()
 
